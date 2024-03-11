@@ -1,6 +1,5 @@
 import Head from 'next/head';
-import { ReactNode } from 'react';
-import { ReactQueryDevtools } from 'react-query/devtools';
+import type { ReactNode } from 'react';
 
 type DefaultLayoutProps = { children: ReactNode };
 
@@ -12,11 +11,7 @@ export const DefaultLayout = ({ children }: DefaultLayoutProps) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>{children}</main>
-
-      {process.env.NODE_ENV !== 'production' && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
+      <main className="h-screen">{children}</main>
     </>
   );
 };

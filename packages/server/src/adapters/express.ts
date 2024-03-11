@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type * as express from 'express';
-import { AnyRouter } from '../router';
-import { nodeHTTPRequestHandler } from './node-http';
-import {
+import type { AnyRouter } from '../core';
+import type {
   NodeHTTPCreateContextFnOptions,
   NodeHTTPHandlerOptions,
 } from './node-http';
+import { nodeHTTPRequestHandler } from './node-http';
 
 export type CreateExpressContextOptions = NodeHTTPCreateContextFnOptions<
   express.Request,
@@ -19,7 +18,12 @@ export function createExpressMiddleware<TRouter extends AnyRouter>(
     const endpoint = req.path.slice(1);
 
     await nodeHTTPRequestHandler({
-      ...opts,
+      // FIXME: no typecasting should be needed here
+      ...(opts as NodeHTTPHandlerOptions<
+        AnyRouter,
+        express.Request,
+        express.Response
+      >),
       req,
       res,
       path: endpoint,

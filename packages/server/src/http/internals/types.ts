@@ -1,17 +1,15 @@
-import {
+import type {
   AnyRouter,
-  Dict,
-  ProcedureType,
-  ResponseMeta,
-  TRPCError,
   inferRouterContext,
   inferRouterError,
-} from '@trpc/server';
-import { URLSearchParams } from 'url';
-import { BaseHandlerOptions } from '../../internals/baseHandlerOptions';
-import { TRPCResponse } from '../../rpc';
+  ProcedureType,
+} from '../../core';
+import type { TRPCError } from '../../error/TRPCError';
+import type { TRPCResponse } from '../../rpc';
+import type { Dict } from '../../types';
+import type { ResponseMeta } from '../types';
 
-export type HTTPHeaders = Dict<string | string[]>;
+export type HTTPHeaders = Dict<string[] | string>;
 
 export interface HTTPResponse {
   status: number;
@@ -19,13 +17,11 @@ export interface HTTPResponse {
   body?: string;
 }
 
-export interface HTTPRequest {
-  method: string;
-  query: URLSearchParams;
-  headers: HTTPHeaders;
-  body: unknown;
-}
+export type ResponseChunk = [procedureIndex: number, responseBody: string];
 
+/**
+ * @internal
+ */
 export type ResponseMetaFn<TRouter extends AnyRouter> = (opts: {
   data: TRPCResponse<unknown, inferRouterError<TRouter>>[];
   ctx?: inferRouterContext<TRouter>;
@@ -35,17 +31,10 @@ export type ResponseMetaFn<TRouter extends AnyRouter> = (opts: {
   paths?: string[];
   type: ProcedureType | 'unknown';
   errors: TRPCError[];
-}) => ResponseMeta;
-
-/**
- * Base interface for anything using HTTP
- */
-export interface HTTPBaseHandlerOptions<TRouter extends AnyRouter, TRequest>
-  extends BaseHandlerOptions<TRouter, TRequest> {
   /**
-   * Add handler to be called before response is sent to the user
-   * Useful for setting cache headers
-   * @link https://trpc.io/docs/caching
+   * `true` if the `ResponseMeta` are being
+   * generated without knowing the response data
+   * (e.g. for streaming requests).
    */
-  responseMeta?: ResponseMetaFn<TRouter>;
-}
+  eagerGeneration?: boolean;
+}) => ResponseMeta;

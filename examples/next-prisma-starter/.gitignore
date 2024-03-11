@@ -17,6 +17,7 @@
 
 # misc
 .DS_Store
+tsconfig.tsbuildinfo
 *.pem
 
 # debug
@@ -35,7 +36,6 @@ yarn-error.log*
 
 *.db
 *.db-journal
-prisma/_sqlite/migrations
 
 
 # testing

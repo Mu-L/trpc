@@ -1,7 +1,6 @@
-import * as trpc from '@trpc/server';
-import { TRPCError } from '@trpc/server';
-import * as trpcExpress from '@trpc/server/adapters/express';
 import { EventEmitter } from 'events';
+import { initTRPC, TRPCError } from '@trpc/server';
+import * as trpcExpress from '@trpc/server/adapters/express';
 import express from 'express';
 import { z } from 'zod';
 
@@ -24,11 +23,12 @@ const createContext = ({
     user: getUser(),
   };
 };
-type Context = trpc.inferAsyncReturnType<typeof createContext>;
+type Context = Awaited<ReturnType<typeof createContext>>;
 
-function createRouter() {
-  return trpc.router<Context>();
-}
+const t = initTRPC.context<Context>().create();
+
+const router = t.router;
+const publicProcedure = t.procedure;
 
 // --------- create procedures etc
 
@@ -55,65 +55,54 @@ function createMessage(text: string) {
   return msg;
 }
 
-const posts = createRouter()
-  .mutation('create', {
-    input: z.object({
-      title: z.string(),
-    }),
-    resolve: ({ input }) => {
+const postRouter = router({
+  createPost: t.procedure
+    .input(z.object({ title: z.string() }))
+    .mutation(({ input }) => {
       const post = {
         id: ++id,
         ...input,
       };
       db.posts.push(post);
       return post;
-    },
-  })
-  .query('list', {
-    resolve: () => db.posts,
-  });
+    }),
+  listPosts: publicProcedure.query(() => db.posts),
+});
 
-const messages = createRouter()
-  .query('list', {
-    resolve: () => db.messages,
-  })
-  .mutation('add', {
-    input: z.string(),
-    resolve: async ({ input }) => {
-      const msg = createMessage(input);
+const messageRouter = router({
+  addMessage: publicProcedure.input(z.string()).mutation(({ input }) => {
+    const msg = createMessage(input);
+    db.messages.push(msg);
 
-      db.messages.push(msg);
-
-      return msg;
-    },
-  });
+    return msg;
+  }),
+  listMessages: publicProcedure.query(() => db.messages),
+});
 
 // root router to call
-export const appRouter = createRouter()
-  .query('hello', {
-    input: z.string().nullish(),
-    resolve: ({ input, ctx }) => {
-      return `hello ${input ?? ctx.user?.name ?? 'world'}`;
-    },
-  })
-  .merge('post.', posts)
-  .merge(
-    'admin.',
-    createRouter().query('secret', {
-      resolve: ({ ctx }) => {
-        if (!ctx.user) {
-          throw new TRPCError({ code: 'UNAUTHORIZED' });
-        }
-        if (ctx.user?.name !== 'alex') {
-          throw new TRPCError({ code: 'FORBIDDEN' });
-        }
-        return {
-          secret: 'sauce',
-        };
-      },
+const appRouter = router({
+  // merge predefined routers
+  post: postRouter,
+  message: messageRouter,
+  // or individual procedures
+  hello: publicProcedure.input(z.string().nullish()).query(({ input, ctx }) => {
+    return `hello ${input ?? ctx.user?.name ?? 'world'}`;
+  }),
+  // or inline a router
+  admin: router({
+    secret: publicProcedure.query(({ ctx }) => {
+      if (!ctx.user) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+      }
+      if (ctx.user?.name !== 'alex') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
+      }
+      return {
+        secret: 'sauce',
+      };
     }),
-  )
-  .merge('messages.', messages);
+  }),
+});
 
 export type AppRouter = typeof appRouter;
 
@@ -141,4 +130,4 @@ async function main() {
   });
 }
 
-main();
+void main();

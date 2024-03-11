@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { createRouter } from '../createRouter';
+import { publicProcedure, router } from '../trpc';
 
 interface Post {
   id: number;
@@ -15,12 +15,10 @@ const db: Db = {
   posts: [],
 };
 
-export const postsRouter = createRouter()
-  .mutation('create', {
-    input: z.object({
-      title: z.string(),
-    }),
-    resolve: ({ input, ctx }) => {
+export const postsRouter = router({
+  create: publicProcedure
+    .input(z.object({ title: z.string() }))
+    .mutation(({ input, ctx }) => {
       if (ctx.user.name !== 'nyan') {
         throw new TRPCError({ code: 'UNAUTHORIZED' });
       }
@@ -28,13 +26,9 @@ export const postsRouter = createRouter()
       const post = { id, ...input };
       db.posts.push(post);
       return post;
-    },
-  })
-  .query('list', {
-    resolve: () => db.posts,
-  })
-  .query('reset', {
-    resolve: () => {
-      db.posts = [];
-    },
-  });
+    }),
+  list: publicProcedure.query(() => db.posts),
+  reset: publicProcedure.mutation(() => {
+    db.posts = [];
+  }),
+});

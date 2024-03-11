@@ -1,12 +1,6 @@
 {
-  "version": "9.26.2",
+  "version": "10.45.2",
   "registry": "https://registry.npmjs.org/",
-  "publishConfig": {
-    "access": "public"
-  },
-  "npmClient": "yarn",
-  "useWorkspaces": true,
-  "packages": [
-    "packages/*"
-  ]
+  "npmClient": "pnpm",
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json"
 }

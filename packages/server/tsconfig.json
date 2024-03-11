@@ -1,8 +1,11 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src", "test"],
+  "include": ["src"],
   "compilerOptions": {
-    "target": "ES2019",
-    "lib": ["ES2020.Promise"]
+    // https://github.com/tsconfig/bases/blob/main/bases/node18.json
+    "lib": ["es2023", "DOM", "DOM.Iterable"],
+    "target": "es2022",
+    "module": "Node16",
+    "moduleResolution": "Node16"
   }
 }

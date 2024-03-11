@@ -1,85 +1,48 @@
-import { AnyRouter, ProcedureType } from '@trpc/server';
-import { TRPCResponse } from '@trpc/server/rpc';
-import { TRPCClientError } from '../TRPCClientError';
-import { TRPCAbortError } from '../internals/TRPCAbortError';
-import { dataLoader } from '../internals/dataLoader';
-import { httpRequest } from '../internals/httpRequest';
-import { transformRPCResponse } from '../internals/transformRPCResponse';
-import { HTTPLinkOptions, TRPCLink } from './core';
+import type { NonEmptyArray } from '../internals/types';
+import type { HTTPBatchLinkOptions } from './HTTPBatchLinkOptions';
+import type { RequesterFn } from './internals/createHTTPBatchLink';
+import { createHTTPBatchLink } from './internals/createHTTPBatchLink';
+import { jsonHttpRequester } from './internals/httpUtils';
+import type { Operation } from './types';
 
-export interface HttpBatchLinkOptions extends HTTPLinkOptions {
-  maxBatchSize?: number;
-}
+const batchRequester: RequesterFn<HTTPBatchLinkOptions> = (requesterOpts) => {
+  return (batchOps) => {
+    const path = batchOps.map((op) => op.path).join(',');
+    const inputs = batchOps.map((op) => op.input);
 
-export function httpBatchLink<TRouter extends AnyRouter>(
-  opts: HttpBatchLinkOptions,
-): TRPCLink<TRouter> {
-  const { url, maxBatchSize } = opts;
-  // initialized config
-  return (runtime) => {
-    // initialized in app
-    type Key = { id: number; path: string; input: unknown };
-
-    const fetcher = (type: ProcedureType) => (keyInputPairs: Key[]) => {
-      const path = keyInputPairs.map((op) => op.path).join(',');
-      const inputs = keyInputPairs.map((op) => op.input);
-
-      const { promise, cancel } = httpRequest({
-        url,
-        inputs,
-        path,
-        runtime,
-        type,
-      });
-
-      return {
-        promise: promise.then((res: unknown[] | unknown) => {
-          if (!Array.isArray(res)) {
-            return keyInputPairs.map(() => res);
-          }
-          return res;
-        }),
-        cancel,
-      };
-    };
-
-    const query = dataLoader<Key, TRPCResponse>(fetcher('query'), {
-      maxBatchSize,
-    });
-
-    const mutation = dataLoader<Key, TRPCResponse>(fetcher('mutation'), {
-      maxBatchSize,
-    });
-
-    const subscription = dataLoader<Key, TRPCResponse>(
-      fetcher('subscription'),
-      { maxBatchSize },
-    );
-
-    const loaders = { query, subscription, mutation };
-
-    return ({ op, prev, onDestroy }) => {
-      const loader = loaders[op.type];
-      const { promise, cancel } = loader.load(op);
-      let isDone = false;
-      const prevOnce: typeof prev = (result) => {
-        if (isDone) {
-          return;
+    const { promise, cancel } = jsonHttpRequester({
+      ...requesterOpts,
+      path,
+      inputs,
+      headers() {
+        if (!requesterOpts.opts.headers) {
+          return {};
         }
-        isDone = true;
-        prev(result);
-      };
-      onDestroy(() => {
-        prevOnce(TRPCClientError.from(new TRPCAbortError(), { isDone: true }));
-        cancel();
-      });
-      promise
-        .then((envelope) => {
-          prevOnce(transformRPCResponse({ envelope, runtime }));
-        })
-        .catch((cause) => {
-          prevOnce(TRPCClientError.from<TRouter>(cause));
-        });
+        if (typeof requesterOpts.opts.headers === 'function') {
+          return requesterOpts.opts.headers({
+            opList: batchOps as NonEmptyArray<Operation>,
+          });
+        }
+        return requesterOpts.opts.headers;
+      },
+    });
+
+    return {
+      promise: promise.then((res) => {
+        const resJSON = Array.isArray(res.json)
+          ? res.json
+          : batchOps.map(() => res.json);
+
+        const result = resJSON.map((item) => ({
+          meta: res.meta,
+          json: item,
+        }));
+
+        return result;
+      }),
+      cancel,
     };
   };
-}
+};
+
+export const httpBatchLink = createHTTPBatchLink(batchRequester);

@@ -1,21 +1,15 @@
 import { z } from 'zod';
-import { createRouter } from '../createRouter';
+import { publicProcedure, router } from '../trpc';
 
-export const apiRouter = createRouter()
-  .query('version', {
-    resolve() {
-      return { version: '0.42.0' };
-    },
-  })
-  .query('hello', {
-    input: z
-      .object({
-        username: z.string().nullish(),
-      })
-      .nullish(),
-    resolve({ input, ctx }) {
+export const apiRouter = router({
+  version: publicProcedure.query(() => {
+    return { version: '0.42.0' };
+  }),
+  hello: publicProcedure
+    .input(z.object({ username: z.string().nullish() }).nullish())
+    .query(({ input, ctx }) => {
       return {
         text: `hello ${input?.username ?? ctx.user?.name ?? 'world'}`,
       };
-    },
-  });
+    }),
+});

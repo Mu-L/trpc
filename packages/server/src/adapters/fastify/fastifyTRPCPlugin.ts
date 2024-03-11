@@ -1,9 +1,10 @@
 /// <reference types="@fastify/websocket" />
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { FastifyHandlerOptions } from '.';
-import { AnyRouter } from '../..';
-import { NodeHTTPCreateContextFnOptions } from '../node-http';
-import { WSSHandlerOptions, applyWSSHandler } from '../ws';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyHandlerOptions } from '.';
+import type { AnyRouter } from '../../core';
+import type { NodeHTTPCreateContextFnOptions } from '../node-http';
+import type { WSSHandlerOptions } from '../ws';
+import { applyWSSHandler } from '../ws';
 import { fastifyRequestHandler } from './fastifyRequestHandler';
 
 export interface FastifyTRPCPluginOptions<TRouter extends AnyRouter> {
@@ -22,6 +23,7 @@ export function fastifyTRPCPlugin<TRouter extends AnyRouter>(
   opts: FastifyTRPCPluginOptions<TRouter>,
   done: (err?: Error) => void,
 ) {
+  fastify.removeContentTypeParser('application/json');
   fastify.addContentTypeParser(
     'application/json',
     { parseAs: 'string' },
@@ -45,7 +47,7 @@ export function fastifyTRPCPlugin<TRouter extends AnyRouter>(
 
   if (opts.useWSS) {
     applyWSSHandler<TRouter>({
-      ...(opts.trpcOptions as WSSHandlerOptions<TRouter>),
+      ...(opts.trpcOptions as unknown as WSSHandlerOptions<TRouter>),
       wss: fastify.websocketServer,
     });
     // eslint-disable-next-line @typescript-eslint/no-empty-function

@@ -1,18 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import type {
   NextApiHandler,
   NextApiRequest,
   NextApiResponse,
 } from 'next/types';
-import { TRPCError } from '../TRPCError';
-import { AnyRouter } from '../router';
-import { TRPCErrorResponse } from '../rpc';
-import { nodeHTTPRequestHandler } from './node-http';
-import {
+import type { AnyRouter } from '../core';
+import { TRPCError } from '../error/TRPCError';
+import { getErrorShape } from '../shared/getErrorShape';
+import type {
   NodeHTTPCreateContextFnOptions,
   NodeHTTPHandlerOptions,
 } from './node-http';
+import { nodeHTTPRequestHandler } from './node-http';
 
 export type CreateNextContextOptions = NodeHTTPCreateContextFnOptions<
   NextApiRequest,
@@ -35,7 +33,8 @@ export function createNextApiHandler<TRouter extends AnyRouter>(
     const path = getPath();
 
     if (path === null) {
-      const error = opts.router.getErrorShape({
+      const error = getErrorShape({
+        config: opts.router._def._config,
         error: new TRPCError({
           message:
             'Query "trpc" not found - is the file named `[trpc]`.ts or `[...trpc].ts`?',
@@ -46,17 +45,21 @@ export function createNextApiHandler<TRouter extends AnyRouter>(
         path: undefined,
         input: undefined,
       });
-      const json: TRPCErrorResponse = {
+      res.statusCode = 500;
+      res.json({
         id: -1,
         error,
-      };
-      res.statusCode = 500;
-      res.json(json);
+      });
       return;
     }
 
     await nodeHTTPRequestHandler({
-      ...opts,
+      // FIXME: no typecasting should be needed here
+      ...(opts as NodeHTTPHandlerOptions<
+        AnyRouter,
+        NextApiRequest,
+        NextApiResponse
+      >),
       req,
       res,
       path,

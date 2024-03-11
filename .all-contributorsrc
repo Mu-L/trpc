@@ -851,7 +851,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/3504472?v=4",
       "profile": "https://www.linkedin.com/in/zomars/",
       "contributions": [
-        "financial"
+        "financial",
+        "bug"
       ]
     },
     {
@@ -1045,7 +1046,9 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/4283185?v=4",
       "profile": "https://dyaa.me",
       "contributions": [
-        "financial"
+        "financial",
+        "code",
+        "test"
       ]
     },
     {
@@ -1064,6 +1067,62 @@
       "profile": "https://github.com/LoriKarikari",
       "contributions": [
         "financial"
+      ]
+    },
+    {
+      "login": "gioboa",
+      "name": "Giorgio Boa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35845425?v=4",
+      "profile": "https://it.linkedin.com/in/giorgio-boa",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "relm923",
+      "name": "Reagan Elm",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1347066?v=4",
+      "profile": "https://github.com/relm923",
+      "contributions": [
+        "test"
+      ]
+    },
+    {
+      "login": "colelawrence",
+      "name": "Cole Lawrence",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2925395?v=4",
+      "profile": "https://colelawrence.com",
+      "contributions": [
+        "bug",
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "Grubba27",
+      "name": "Gabriel Grubba",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70247653?v=4",
+      "profile": "https://grubba.vercel.app/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "oscartbeaumont",
+      "name": "Oscar Beaumont",
+      "avatar_url": "https://avatars.githubusercontent.com/u/21004798?v=4",
+      "profile": "https://otbeaumont.me",
+      "contributions": [
+        "question"
+      ]
+    },
+    {
+      "login": "anthonyshew",
+      "name": "Anthony Shew",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35677084?v=4",
+      "profile": "https://inthezone.dev",
+      "contributions": [
+        "doc"
       ]
     }
   ],

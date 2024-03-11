@@ -16,8 +16,8 @@ export function createServer(opts: ServerOptions) {
   const prefix = opts.prefix ?? '/trpc';
   const server = fastify({ logger: dev });
 
-  server.register(ws);
-  server.register(fastifyTRPCPlugin, {
+  void server.register(ws);
+  void server.register(fastifyTRPCPlugin, {
     prefix,
     useWSS: true,
     trpcOptions: { router: appRouter, createContext },
@@ -27,22 +27,12 @@ export function createServer(opts: ServerOptions) {
     return { hello: 'wait-on 💨' };
   });
 
-  server.get('/hello', async () => {
-    return { hello: 'GET' };
-  });
-
-  server.post<{ Body: { text: string; life: number } }>(
-    '/hello',
-    async ({ body }) => {
-      console.log('BODY:', typeof body, body);
-      return { hello: 'POST', body };
-    },
-  );
-
-  const stop = () => server.close();
+  const stop = async () => {
+    await server.close();
+  };
   const start = async () => {
     try {
-      await server.listen(port);
+      await server.listen({ port });
       console.log('listening on port', port);
     } catch (err) {
       server.log.error(err);

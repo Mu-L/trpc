@@ -1,60 +1,100 @@
 {
   "name": "@trpc/next",
-  "version": "9.26.2",
-  "description": "tRPC Next lib",
+  "version": "10.45.2",
+  "description": "The tRPC Next.js library",
   "author": "KATT",
   "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "typings": "dist/index.d.ts",
   "homepage": "https://trpc.io",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/trpc/trpc.git",
     "directory": "packages/next"
   },
-  "preconstruct": {
-    "entrypoints": [
-      "index.ts"
-    ]
-  },
-  "scripts": {},
-  "main": "dist/trpc-next.cjs.js",
-  "module": "dist/trpc-next.esm.js",
-  "typings": "dist/trpc-next.cjs.d.ts",
-  "files": [
-    "README.md",
-    "dist",
-    "src"
-  ],
   "eslintConfig": {
     "rules": {
-      "react-hooks/exhaustive-deps": "error"
+      "react-hooks/exhaustive-deps": "error",
+      "no-restricted-imports": [
+        "error",
+        "@trpc/next"
+      ]
     }
   },
+  "scripts": {
+    "build": "rollup --config rollup.config.ts --configPlugin rollup-plugin-swc3",
+    "dev": "pnpm build --watch",
+    "codegen-entrypoints": "tsx entrypoints.script.ts",
+    "lint": "eslint --cache --ext \".js,.ts,.tsx\" --ignore-path ../../.gitignore --report-unused-disable-directives src"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./app-dir/server": {
+      "import": "./dist/app-dir/server.mjs",
+      "require": "./dist/app-dir/server.js",
+      "default": "./dist/app-dir/server.js"
+    },
+    "./app-dir/client": {
+      "import": "./dist/app-dir/client.mjs",
+      "require": "./dist/app-dir/client.js",
+      "default": "./dist/app-dir/client.js"
+    },
+    "./app-dir/links/nextCache": {
+      "import": "./dist/app-dir/links/nextCache.mjs",
+      "require": "./dist/app-dir/links/nextCache.js",
+      "default": "./dist/app-dir/links/nextCache.js"
+    },
+    "./app-dir/links/nextHttp": {
+      "import": "./dist/app-dir/links/nextHttp.mjs",
+      "require": "./dist/app-dir/links/nextHttp.js",
+      "default": "./dist/app-dir/links/nextHttp.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "package.json",
+    "app-dir",
+    "!**/*.test.*"
+  ],
   "peerDependencies": {
-    "@trpc/client": "^9.12.0",
-    "@trpc/react": "^9.12.0",
-    "@trpc/server": "^9.12.0",
+    "@tanstack/react-query": "^4.18.0",
+    "@trpc/client": "10.45.2",
+    "@trpc/react-query": "10.45.2",
+    "@trpc/server": "10.45.2",
     "next": "*",
     "react": ">=16.8.0",
-    "react-dom": ">=16.8.0",
-    "react-query": "^3.37.0"
-  },
-  "dependencies": {
-    "@babel/runtime": "^7.9.0",
-    "react-ssr-prepass": "^1.5.0"
+    "react-dom": ">=16.8.0"
   },
   "devDependencies": {
-    "@trpc/client": "^9.26.2",
-    "@trpc/react": "^9.26.2",
-    "@trpc/server": "^9.26.2",
-    "@types/express": "^4.17.12",
+    "@tanstack/react-query": "^4.18.0",
+    "@trpc/client": "10.45.2",
+    "@trpc/react-query": "10.45.2",
+    "@trpc/server": "10.45.2",
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.33",
+    "@types/react-dom": "^18.2.14",
+    "eslint": "^8.40.0",
     "express": "^4.17.1",
-    "next": "^12.1.6",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
-    "react-query": "^3.39.2",
+    "next": "^14.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rollup": "^2.79.1",
+    "tsx": "^4.0.0",
     "zod": "^3.0.0"
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "funding": [
+    "https://trpc.io/sponsor"
+  ]
 }

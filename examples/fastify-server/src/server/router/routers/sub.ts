@@ -1,16 +1,16 @@
-import { Subscription } from '@trpc/server';
-import { createRouter } from '../createRouter';
+import { observable } from '@trpc/server/observable';
+import { publicProcedure, router } from '../trpc';
 
-export const subRouter = createRouter().subscription('randomNumber', {
-  resolve() {
-    return new Subscription<{ randomNumber: number }>((emit) => {
+export const subRouter = router({
+  randomNumber: publicProcedure.subscription(() => {
+    return observable<{ randomNumber: number }>((emit) => {
       const timer = setInterval(() => {
-        emit.data({ randomNumber: Math.random() });
+        emit.next({ randomNumber: Math.random() });
       }, 1000);
 
       return () => {
         clearInterval(timer);
       };
     });
-  },
+  }),
 });
