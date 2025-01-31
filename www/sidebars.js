@@ -1,112 +1,199 @@
+// @ts-check
+
+import { parseEnv } from './src/utils/env';
+
+const env = parseEnv(process.env);
+
 module.exports = {
   docs: [
     {
       type: 'category',
       label: 'tRPC',
       collapsed: false,
+      link: {
+        type: 'doc',
+        id: 'main/introduction',
+      },
       items: [
-        'main/introduction',
+        'main/getting-started',
+        'main/concepts',
         'main/quickstart',
+        'main/videos-and-community-resources',
         'main/example-apps',
-        'nextjs/introduction',
-        'reactjs/introduction',
-        'main/contributing',
-        'main/love',
-        'main/sponsors',
-        'main/awesome-trpc',
       ],
     },
     {
       type: 'category',
-      label: '@trpc/server',
-      collapsed: false,
+      label: 'Backend Usage',
+      collapsed: true,
+      link: {
+        type: 'generated-index',
+        title: 'tRPC server documentation',
+        slug: '/server/introduction',
+      },
       items: [
-        'server/router',
+        'server/routers',
         'server/procedures',
+        'server/validators',
         'server/merging-routers',
         'server/context',
         'server/middlewares',
+        {
+          type: 'category',
+          label: 'Hosting tRPC with Adapters',
+          collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'server/adapters-intro',
+          },
+          items: [
+            'server/adapters/standalone',
+            'server/adapters/express',
+            'server/adapters/fastify',
+            'server/adapters/nextjs',
+            'server/adapters/aws-lambda',
+            'server/adapters/fetch',
+          ],
+        },
         'server/server-side-calls',
         'server/authorization',
-        'server/output-validation',
-        'server/infer-types',
         'server/error-handling',
         'server/error-formatting',
         'server/data-transformers',
         'server/metadata',
         'server/caching',
-        {
-          type: 'category',
-          label: 'Adapters',
-          collapsed: true,
-          items: [
-            'server/adapter/aws-lambda',
-            'server/adapter/express',
-            'server/adapter/fastify',
-            'server/adapter/fetch',
-          ],
-        },
+        'server/subscriptions',
+        'server/websockets',
       ],
     },
     {
       type: 'category',
-      label: '@trpc/client',
-      collapsed: false,
+      label: 'Client Usage',
+      collapsed: true,
+      link: {
+        type: 'doc',
+        id: 'client/overview',
+      },
       items: [
-        'client/vanilla',
-        'client/aborting-procedures',
+        {
+          type: 'category',
+          label: 'React Query Integration',
+          collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'client/react/introduction',
+          },
+          items: [
+            'client/react/setup',
+            'client/react/server-components',
+            'client/react/infer-types',
+            'client/react/useQuery',
+            'client/react/useMutation',
+            'client/react/useInfiniteQuery',
+            'client/react/useSubscription',
+            'client/react/useUtils',
+            'client/react/createTRPCQueryUtils',
+            'client/react/useQueries',
+            'client/react/suspense',
+            'client/react/getQueryKey',
+            'client/react/aborting-procedure-calls',
+            'client/react/disabling-queries',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Next.js Integration',
+          collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'client/nextjs/introduction',
+          },
+          items: [
+            'client/nextjs/setup',
+            'client/nextjs/ssr',
+            'client/nextjs/ssg',
+            'client/nextjs/server-side-helpers',
+            'client/nextjs/aborting-procedure-calls',
+            'client/nextjs/starter-projects',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Vanilla Client',
+          collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'client/vanilla/introduction',
+          },
+          items: [
+            'client/vanilla/setup',
+            'client/vanilla/infer-types',
+            'client/vanilla/aborting-procedure-calls',
+          ],
+        },
         {
           type: 'category',
           label: 'Links',
           collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'client/links/overview',
+          },
           items: [
-            'client/links/links',
             'client/links/httpLink',
             'client/links/httpBatchLink',
+            'client/links/httpBatchStreamLink',
+            'client/links/httpSubscriptionLink',
             'client/links/wsLink',
             'client/links/splitLink',
             'client/links/loggerLink',
+            'client/links/retryLink',
           ],
         },
-        'client/header',
+        'client/headers',
         'client/cors',
       ],
     },
     {
       type: 'category',
-      label: '@trpc/react-query',
-      collapsed: false,
-      items: [
-        'reactjs/queries',
-        'reactjs/mutations',
-        'reactjs/useInfiniteQuery',
-        'reactjs/useContext',
-      ],
-    },
-    {
-      type: 'category',
-      label: '@trpc/next',
-      collapsed: false,
-      items: [
-        'nextjs/ssr',
-        'nextjs/ssg',
-        'nextjs/ssg-helpers',
-        'nextjs/starter-projects',
-      ],
-    },
-    {
-      type: 'category',
       label: 'Extra information',
-      collapsed: false,
-      items: [
-        'further/rpc',
-        'further/subscriptions',
-        'further/further-reading',
-      ],
+      collapsed: true,
+      link: {
+        type: 'generated-index',
+        title: 'Extra Information',
+        slug: '/further',
+      },
+      items: ['further/faq', 'further/rpc', 'further/further-reading'],
     },
+    ...(env.TYPEDOC
+      ? [
+          {
+            type: 'category',
+            label: 'API Reference (Auto-generated)',
+            collapsed: true,
+            items: [
+              {
+                type: 'autogenerated',
+                dirName: 'typedoc',
+              },
+            ],
+          },
+        ]
+      : []),
     {
       type: 'doc',
-      id: 'migration/migrate-from-v9-to-v10',
+      id: 'migration/migrate-from-v10-to-v11',
+    },
+    {
+      type: 'category',
+      label: 'Community',
+      collapsed: true,
+      items: [
+        'community/awesome-trpc',
+        'community/contributing',
+        'community/love',
+        'community/sponsors',
+      ],
     },
   ],
 };
